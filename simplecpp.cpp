@@ -889,9 +889,16 @@ void simplecpp::TokenList::constFoldMulDivRem(Token *tok)
             continue;
 
         long long result;
-        if (tok->op == '*')
-            result = (stringToLL(tok->previous->str()) * stringToLL(tok->next->str()));
-        else if (tok->op == '/' || tok->op == '%') {
+        if (tok->op == '*') {
+            long long a = stringToLL(tok->previous->str());
+            long long b = stringToLL(tok->next->str());
+            if ((a > 0 && b > 0 && a > std::numeric_limits<long long>::max() / b) ||
+                (a < 0 && b > 0 && a < std::numeric_limits<long long>::min() / b) ||
+                (a > 0 && b < 0 && b < std::numeric_limits<long long>::min() / a) ||
+                (a < 0 && b < 0 && a < std::numeric_limits<long long>::max() / b))
+                throw std::overflow_error("multiplication overflow");
+            result = a * b;
+        } else if (tok->op == '/' || tok->op == '%') {
             long long rhs = stringToLL(tok->next->str());
             if (rhs == 0)
                 throw std::overflow_error("division/modulo by zero");
@@ -921,11 +928,21 @@ void simplecpp::TokenList::constFoldAddSub(Token *tok)
             continue;
 
         long long result;
-        if (tok->op == '+')
-            result = stringToLL(tok->previous->str()) + stringToLL(tok->next->str());
-        else if (tok->op == '-')
-            result = stringToLL(tok->previous->str()) - stringToLL(tok->next->str());
-        else
+        if (tok->op == '+') {
+            long long a = stringToLL(tok->previous->str());
+            long long b = stringToLL(tok->next->str());
+            if (((b > 0) && (a > std::numeric_limits<long long>::max() - b)) ||
+                ((b < 0) && (a < std::numeric_limits<long long>::min() - b)))
+                throw std::overflow_error("addition overflow");
+            result = a + b;
+        } else if (tok->op == '-') {
+            long long a = stringToLL(tok->previous->str());
+            long long b = stringToLL(tok->next->str());
+            if (((b > 0) && (a < std::numeric_limits<long long>::min() + b)) ||
+                ((b < 0) && (a > std::numeric_limits<long long>::max() + b)))
+                throw std::overflow_error("subtraction overflow");
+            result = a - b;
+        } else
             continue;
 
         tok = tok->previous;
