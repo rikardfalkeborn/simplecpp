@@ -7,3 +7,6 @@ script:
   - make test
 # it should be possible to import simplecpp.cpp into software that is compiled with old compilers
   - g++ -fsyntax-only -std=c++98 simplecpp.cpp
+# run tests with sanitizers
+  - make clean
+  - CXXFLAGS+="-fsanitize=address,undefined -fno-sanitize-recover=all -Og -g3" LDFLAGS+="-fsanitize=address,undefined" make test
