@@ -1,7 +1,7 @@
 all:	testrunner simplecpp
 
-CXXFLAGS = -Wall -Wextra -pedantic -Wcast-qual -Wfloat-equal -Wmissing-declarations -Wmissing-format-attribute -Wredundant-decls -Wshadow -Wundef -std=c++0x -g
-LDFLAGS = -g
+CXXFLAGS += -Wall -Wextra -pedantic -Wcast-qual -Wfloat-equal -Wmissing-declarations -Wmissing-format-attribute -Wredundant-decls -Wshadow -Wundef -std=c++0x -g
+LDFLAGS += -g
 
 %.o: %.cpp	simplecpp.h
 	$(CXX) $(CXXFLAGS) -c $<
